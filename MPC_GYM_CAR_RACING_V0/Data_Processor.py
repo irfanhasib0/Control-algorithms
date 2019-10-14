@@ -12,7 +12,7 @@ from collections import deque
 import numpy as np
 class Data_Processor():
     
-    def __init__(self,_speed=1.0,tlen=15):
+    def __init__(self,_speed=1.0,tlen=25):
         self._stream=[]
         self.target_speed=_speed
         self.tlen=tlen
@@ -31,7 +31,7 @@ class Data_Processor():
         self.traj[2,:]=self.vs
         self.traj[3,:]=self.yaws
         
-        return self.traj
+        return self.traj.copy()
         
         
     def get_spline(self,tx,ty,dl):
@@ -44,8 +44,8 @@ class Data_Processor():
         
         dcx=np.gradient(self.xs)
         dcy=np.gradient(self.ys)
-        cyaw=[np.arctan2(y,x) for x,y in zip(dcx,dcy)]
-        return cyaw
+        _yaw=[np.arctan2(y,x) for x,y in zip(dcx,dcy)]
+        return _yaw.copy()
         #sp = calc_speed_profile(cx, cy, cyaw, TARGET_SPEED)
 
     def get_speed_profile(self):

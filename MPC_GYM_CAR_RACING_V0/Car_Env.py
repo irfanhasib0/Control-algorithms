@@ -17,9 +17,12 @@ class State:
         self.predelta = None
 class Car_Env():
     
-    def __init__(self):
-        self.ENV=CarRacing()
-        
+    def __init__(self,rec=False,qlen=25,max_len=50):
+        #self.ENV=CarRacing()
+        self.max_len=max_len
+        self.qlen=qlen
+        self.ENV=gym.make('CarRacing-v0')
+        if rec==True : self.ENV = gym.wrappers.Monitor(self.ENV, "Rec")
         self._save_path=False
         self._read_path=True
         self._state=State(x=0,y=0,yaw=0,v=0)
@@ -82,7 +85,7 @@ class Car_Env():
         #self.Dstr.get_origin_shift(self._state)
         #self.Dstr.shift_trajectory()
         _traj,_dind,_end=self._Map_Tracker.run(self._state)
-        return [0,0,ang,vel],[_traj,_dind,_end],[pos[0],pos[1]],rw,ter,info
+        return [0,0,ang,vel],[_traj,_dind,_end],[pos[0],pos[1]],nst,rw,ter,info
 
     
     
@@ -110,7 +113,7 @@ class Car_Env():
         
         points=[[x,y] for a,b,x,y in self.ENV.track]
         self.points=np.array(points)
-        self._Map_Tracker=Map_Tracker(self.points,qlen=15,rel_pos=True)
+        self._Map_Tracker=Map_Tracker(self.points,qlen=self.qlen,rel_pos=True,max_len=self.max_len)
         #self.Dstr.get_planned_traj(self.points)
         
         plt.plot(self.points[:,0],self.points[:,1])

@@ -11,12 +11,12 @@ import numpy as np
 from collections import deque
 class Map_Tracker():
     
-    def __init__(self,_stream,qlen=15,rel_pos=False):
+    def __init__(self,_stream,qlen=25,rel_pos=False,max_len=50):
         self._stream=_stream
         self.rel_pos=rel_pos
         self.point_stream=deque(maxlen=qlen)
         self.qlen=qlen
-        self.max_len=50
+        self.max_len=max_len
         self.index=0
         self.dind=0
         self.end=False
