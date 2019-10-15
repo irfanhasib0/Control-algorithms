@@ -17,15 +17,14 @@ class Move_Contour():
         self.YY=YY
         self.ox=0
         self.oy=0
-        phi=(math.pi*phi)/180
-        self.rot_mat=np.array([[math.cos(phi),-math.sin(phi)],[math.sin(phi),math.cos(phi)]])
+        self.rot_mat=np.array([[math.cos(phi),math.sin(phi)],[-math.sin(phi),math.cos(phi)]])
     def move(self):
         self.points[:,0]+=self.XX
         self.points[:,1]+=self.YY
     def get_origin(self):
         ox=0
         oy=0
-        oo=np.mean(self.points,axis=0)
+        oo=np.mean(self.points[:-1],axis=0)
         self.ox=oo[0]
         self.oy=oo[1]
         #print(self.ox,self.oy)

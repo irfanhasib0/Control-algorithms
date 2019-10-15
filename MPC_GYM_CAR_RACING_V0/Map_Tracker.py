@@ -9,6 +9,7 @@ elif state.yaw - cyaw[0] <= -math.pi:
 
 import numpy as np
 from collections import deque
+import math
 class Map_Tracker():
     
     def __init__(self,_stream,qlen=25,rel_pos=False,max_len=50):
@@ -59,4 +60,8 @@ class Map_Tracker():
         if self.rel_pos==True:
             new_traj[:,0]-=state.x
             new_traj[:,1]-=state.y
+            phi=state.yaw
+            self.rot_mat=np.array([[math.cos(phi),math.sin(phi)],[-math.sin(phi),math.cos(phi)]])
+            temp=np.matmul(self.rot_mat,new_traj.T)
+            new_traj=temp.T
         return new_traj,self.dind,self.end

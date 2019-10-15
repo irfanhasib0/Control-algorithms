@@ -85,10 +85,10 @@ class Car_Env():
         #self.Dstr.get_origin_shift(self._state)
         #self.Dstr.shift_trajectory()
         _traj,_dind,_end=self._Map_Tracker.run(self._state)
-        return [0,0,ang,vel],[_traj,_dind,_end],[pos[0],pos[1]],nst,rw,ter,info
+        return [0,0,0,vel],[_traj,_dind,_end],[pos[0],pos[1],ang],nst,rw,ter,info
 
     
-    
+
     def render(self):
             
             font = cv2.FONT_HERSHEY_SIMPLEX
