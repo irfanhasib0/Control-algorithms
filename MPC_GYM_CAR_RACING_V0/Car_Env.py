@@ -17,14 +17,15 @@ class State:
         self.predelta = None
 class Car_Env():
     
-    def __init__(self,rec=False,qlen=25,max_len=50):
+    def __init__(self,rec=False,qlen=25,max_len=50,rec_path="Rec",seed=123):
         #self.ENV=CarRacing()
         self.max_len=max_len
         self.qlen=qlen
         self.ENV=gym.make('CarRacing-v0')
-        if rec==True : self.ENV = gym.wrappers.Monitor(self.ENV, "Rec")
-        self._save_path=False
-        self._read_path=True
+        self.ENV.seed(seed)
+        #if rec==True : self.ENV = gym.wrappers.Monitor(self.ENV,rec_path)
+        self._save_path=True
+        self._read_path=False
         self._state=State(x=0,y=0,yaw=0,v=0)
         self.points=[[0,0]]
         self.frame=np.zeros((100,200,3),dtype=np.uint8)
@@ -33,14 +34,14 @@ class Car_Env():
         #self.Dstr=Data_Streamer(15,TARGET_SPEED)
         
     def read_path(self):
-        f=open('path-1','rb')
+        f=open('path_seed_123','rb')
         track=pickle.load(f)
         f.close()
         self.ENV.track=track
     
     
     def save_path(self):
-        f=open('path-2','wb')
+        f=open('path_seed_123','wb')
         pickle.dump(self.ENV.track,f)
         f.close()
     
@@ -89,18 +90,18 @@ class Car_Env():
 
     
 
-    def render(self):
-            
-            font = cv2.FONT_HERSHEY_SIMPLEX
-            plt.cla()
-            img = cv2.putText(np.array(self.frame), 'vel %f'%vel, (100,10), font,.3, (255,255,0),1, cv2.LINE_AA)
-            img = cv2.putText(np.array(img), 'ang %f'%ang, (100,20), font,.3, (255,0,255),1, cv2.LINE_AA)
-            image = cv2.putText(np.array(img), 'x,y %f,%f'%(pos[0],pos[1]), (100,30), font,.2, (255,0,255),1, cv2.LINE_AA)
+    def render(self,mode='rgb_array'):
+            img_raw=self.ENV.render(mode=mode)
+            #font = cv2.FONT_HERSHEY_SIMPLEX
+            #plt.cla()
+            #img = cv2.putText(np.array(self.frame), 'vel %f'%vel, (100,10), font,.3, (255,255,0),1, cv2.LINE_AA)
+            #img = cv2.putText(np.array(img), 'ang %f'%ang, (100,20), font,.3, (255,0,255),1, cv2.LINE_AA)
+            #image = cv2.putText(np.array(img), 'x,y %f,%f'%(pos[0],pos[1]), (100,30), font,.2, (255,0,255),1, cv2.LINE_AA)
 
-            plt.imshow(image)
-            plt.show()
-            plt.pause(0.0001)
-
+            #plt.imshow(image)
+            #plt.show()
+            #plt.pause(0.0001)
+            return img_raw
 
     def reset(self):
         
