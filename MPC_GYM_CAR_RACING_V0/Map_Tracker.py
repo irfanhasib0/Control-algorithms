@@ -10,6 +10,7 @@ elif state.yaw - cyaw[0] <= -math.pi:
 import numpy as np
 from collections import deque
 import math
+from scipy.interpolate import CubicSpline
 class Map_Tracker():
     
     def __init__(self,_stream,qlen=25,rel_pos=False,max_len=50):
@@ -18,7 +19,7 @@ class Map_Tracker():
         self.point_stream=deque(maxlen=qlen)
         self.qlen=qlen
         self.max_len=max_len
-        self.index=0
+        self.index=1
         self.dind=0
         self.end=False
         self.x,self.y=self._stream[:self.max_len,0],self._stream[:self.max_len,1]
@@ -30,7 +31,7 @@ class Map_Tracker():
     def add_points(self,num):
         
         for _ in range(num):
-            ind=self.index
+            ind=self.index #shifting trajectory 1 point ahead
             if ind<len(self.x)-1:
                 self.point_stream.append([self.x[ind],self.y[ind]])
                 self.index+=1
@@ -48,7 +49,6 @@ class Map_Tracker():
         return self.dind
     
     def shift_trajectory(self):
-        
         if self.dind:
             self.end=self.add_points(self.dind)
         return self.end 
@@ -64,4 +64,11 @@ class Map_Tracker():
             self.rot_mat=np.array([[math.cos(phi),math.sin(phi)],[-math.sin(phi),math.cos(phi)]])
             temp=np.matmul(self.rot_mat,new_traj.T)
             new_traj=temp.T
-        return new_traj,self.dind,self.end
+        try:
+            cs_traj=new_traj.copy()
+            cs=CubicSpline(cs_traj[:,0],cs_traj[:,1])
+            cs_traj[:,0]=np.arange(0.5,self.qlen,1)
+            cs_traj[:,1]=cs(cs_traj[:,0])
+        except:
+            cs_traj=new_traj.copy()
+        return new_traj.copy(),self.dind,self.end
