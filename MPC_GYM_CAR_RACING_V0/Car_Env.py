@@ -17,8 +17,10 @@ class State:
         self.predelta = None
 class Car_Env():
     
-    def __init__(self,rec=False,qlen=25,max_len=50,rec_path="Rec",seed=123):
+    def __init__(self,rec=False,qlen=25,max_len=50,_path="path",seed=123):
         #self.ENV=CarRacing()
+        self._path=_path+'map_'+str(seed)
+        self.seed=seed
         self.max_len=max_len
         self.qlen=qlen
         self.ENV=gym.make('CarRacing-v0')
@@ -34,14 +36,14 @@ class Car_Env():
         #self.Dstr=Data_Streamer(15,TARGET_SPEED)
         
     def read_path(self):
-        f=open('path_seed_123','rb')
+        f=open(self._path,'rb')
         track=pickle.load(f)
         f.close()
         self.ENV.track=track
     
     
     def save_path(self):
-        f=open('path_seed_123','wb')
+        f=open(self._path,'wb')
         pickle.dump(self.ENV.track,f)
         f.close()
     

@@ -64,6 +64,7 @@ class Map_Tracker():
             self.rot_mat=np.array([[math.cos(phi),math.sin(phi)],[-math.sin(phi),math.cos(phi)]])
             temp=np.matmul(self.rot_mat,new_traj.T)
             new_traj=temp.T
+        '''
         try:
             cs_traj=new_traj.copy()
             cs=CubicSpline(cs_traj[:,0],cs_traj[:,1])
@@ -71,4 +72,5 @@ class Map_Tracker():
             cs_traj[:,1]=cs(cs_traj[:,0])
         except:
             cs_traj=new_traj.copy()
+        '''
         return new_traj.copy(),self.dind,self.end

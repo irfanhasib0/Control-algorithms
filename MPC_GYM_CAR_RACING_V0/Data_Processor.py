@@ -76,7 +76,7 @@ class Data_Processor():
                 xref[:, i] = traj_points[:,i]
                 dref[0, i] = 0.0
             else:
-                xref[:, i] = traj_points[:,-1]
+                xref[:, i] = traj_points[:,i]
                 dref[0, i] = 0.0
 
         return xref,dref
