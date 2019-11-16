@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+from matplotlib import pyplot as plt
 class image_to_traj():
     def __init__(self,N=25):
         self.N=N
@@ -12,14 +13,14 @@ class image_to_traj():
         #hough = cv2.HoughLinesP(segment, 1, np.pi / 180, 10, np.array([]), minLineLength = 5, maxLineGap = 5)
     def do_canny(self,image):
         gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
-        blur = cv2.GaussianBlur(gray, (5, 5), 0)
-        canny = cv2.Canny(blur, 50, 150)
-        return canny
+        #blur = cv2.GaussianBlur(gray, (3, 3), 0)
+        canny = cv2.Canny(gray, 50, 150)
+        return cann
 
     def do_segment(self,img):
         height = img.shape[0]
         polygons = np.array([
-                                [(0, 80), (96, 80), (0, 0),(96,0)]
+                                [(0, 60), (96, 60), (0, 0),(96,0)]
                             ])
         mask = np.zeros_like(img)
         cv2.fillPoly(mask, polygons, 255)
@@ -51,8 +52,8 @@ class image_to_traj():
             #print(crop)
             _crop=crop.copy()
             img = cv2.circle(_crop,(cx,cy), 2, (255,255,255), -1)
-            #plt.imshow(img,cmap='gray',vmin=0,vmax=255)
-            #plt.show()_
+            plt.imshow(img,cmap='gray',vmin=0,vmax=255)
+            plt.show()
             offset+=self.N
             #print(i)
         return crops,cxs,_cys,cys
