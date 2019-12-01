@@ -8,6 +8,7 @@ import time
 import pickle
 from Map_Tracker import Map_Tracker
 import airsim
+import math
 #from AirSimClient import *
 class State:
      
@@ -21,12 +22,12 @@ class Car_Env():
     
     def __init__(self,rec=False,qlen=5,max_len=50,path='',seed=123):
         #self.ENV=CarRacing()
-        self._path=path+'map_as_'+str(seed)
+        self._path='map_as_'+str(seed)
         self.seed=seed
         self.max_len=max_len
         self.qlen=qlen
-        self._save_path=True
-        self._read_path=False
+        self._save_path=False
+        self._read_path=True
         self._state=State(x=0,y=0,yaw=0,v=0)
         self.points=[[0,0]]
        
@@ -46,7 +47,7 @@ class Car_Env():
         f=open(self._path,'rb')
         track=pickle.load(f)
         f.close()
-        self.ENV.track=track
+        self.track=track
     
     
     def save_path(self):
@@ -67,6 +68,19 @@ class Car_Env():
         #power=4*mass*accl*(vel+accl/2)
         gas=power/ENGINE_POWER
         return gas
+    def quaternion_to_euler(self,x, y, z, w):
+
+        t0 = +2.0 * (w * x + y * z)
+        t1 = +1.0 - 2.0 * (x * x + y * y)
+        roll = math.atan2(t0, t1)
+        t2 = +2.0 * (w * y - z * x)
+        t2 = +1.0 if t2 > +1.0 else t2
+        t2 = -1.0 if t2 < -1.0 else t2
+        pitch = math.asin(t2)
+        t3 = +2.0 * (w * z + x * y)
+        t4 = +1.0 - 2.0 * (y * y + z * z)
+        yaw = math.atan2(t3, t4)
+        return [yaw, pitch, roll]
     
     def step(self,action,show_plot=False):
 
@@ -82,11 +96,11 @@ class Car_Env():
         car_state = self.client.getCarState()
         
         if (car_state.speed <= self.gas):
-            self.car_controls.throttle = 0.5
+            self.car_controls.throttle = 0.2
         else:
             self.car_controls.throttle = 0.0
         
-        #car_controls.throttle=self.gas
+        self.car_controls.throttle=self.gas
         self.car_controls.steering=self.steer
         self.car_controls.brake=self.brake
         
@@ -95,8 +109,13 @@ class Car_Env():
         car_state = self.client.getCarState()
         pos=car_state.kinematics_estimated.position
         vel=car_state.speed
-        ang=car_state.kinematics_estimated.orientation.z_val
-        #ang*=-1
+        angx=car_state.kinematics_estimated.orientation.x_val
+        angy=car_state.kinematics_estimated.orientation.y_val
+        angz=car_state.kinematics_estimated.orientation.z_val
+        angw=car_state.kinematics_estimated.orientation.w_val
+        
+        [ang,_,_]=self.quaternion_to_euler(angx,angy,angz,angw)
+        #a#ng*=-1
         #ang=ang+np.deg2rad(90)#-ang
         nst=0
         rw=0
@@ -124,17 +143,17 @@ class Car_Env():
     def reset(self):
         self.client.reset()
         
-        self.track=range(100)
         
+        self.track=[]
         if self._save_path==True:
             self.save_path()
         if self._read_path ==True:
             self.read_path()
         
-        points=[[x,0] for x in self.track]
-        for i in range(25,50):
-             points[i][1]=-5
-        self.points=np.array(points,dtype=np.float64)
+        
+        #for i in range(25,50):
+        #     points[i][1]=-5
+        self.points=np.array(self.track,dtype=np.float64)
         self._Map_Tracker=Map_Tracker(self.points,qlen=self.qlen,rel_pos=True,max_len=self.max_len)
         #self.Dstr.get_planned_traj(self.points)
         
