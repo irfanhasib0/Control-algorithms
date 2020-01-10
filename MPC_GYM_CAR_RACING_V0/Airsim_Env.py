@@ -20,9 +20,9 @@ class State:
         self.predelta = None
 class Car_Env():
     
-    def __init__(self,rec=False,qlen=5,max_len=50,path='',seed=123):
+    def __init__(self,rec=False,qlen=5,max_len=50,path='',loop='1',seed=123):
         #self.ENV=CarRacing()
-        self._path='_map_as_'+str(seed)
+        self._path="city_map"#loop+'_map_as_'+str(seed)
         self.seed=seed
         self.max_len=max_len
         self.qlen=qlen
@@ -62,20 +62,32 @@ class Car_Env():
         WHEEL_MOMENT_OF_INERTIA = 4000*SIZE*SIZE
         WHEEL_R  = 27 
         wheel_rad=WHEEL_R*SIZE
-        mass=(2*WHEEL_MOMENT_OF_INERTIA)/wheel_rad
+        mass=(2*WHEEL_MOMENT_OF_INERTIA)/wheel_rade
         #mass=.25
         power=4*mass*accl*(2*vel+accl*dt)/2#
         #power=4*mass*accl*(vel+accl/2)
         gas=power/ENGINE_POWER
         return gas
-    def get_image(self,cam):
+    def get_image(self,cam,img_type='scene'):
         """
         Get image from AirSim client
         """
-        image_response = self.client.simGetImages([airsim.ImageRequest(cam, airsim.ImageType.Scene, False, False)])[0]
-        image1d = np.fromstring(image_response.image_data_uint8, dtype=np.uint8)
-        image_rgb = image1d.reshape(image_response.height, image_response.width, 3)
+        if img_type=='scene':
+            image_response = self.client.simGetImages([airsim.ImageRequest(cam, airsim.ImageType.Scene, False, False)])[0]
+            image1d = np.fromstring(image_response.image_data_uint8, dtype=np.uint8)
+            image_rgb = image1d.reshape(image_response.height, image_response.width, 3)
+        if img_type=='dp':
+            image_response = self.client.simGetImages([airsim.ImageRequest(cam, airsim.ImageType.DepthPlanner, True)])[0]
+            image1d = np.array(image_response.image_data_float, dtype=np.float64)
+            #image1d=np.array(image_response,dtype=np.float64)
+            image_rgb = image1d.reshape(image_response.height, image_response.width)
+        if img_type=='seg':
+            image_response = self.client.simGetImages([airsim.ImageRequest(cam, airsim.ImageType.Segmentation, False, False)])[0]
+            image1d = np.fromstring(image_response.image_data_uint8, dtype=np.uint8)
+            image_rgb = image1d.reshape(image_response.height, image_response.width, 3)
+        
         return image_rgb#[78:144,27:227,0:3]#.astype(np)
+    
     
     def quaternion_to_euler(self,x, y, z, w):
 
@@ -128,10 +140,24 @@ class Car_Env():
         #ang=ang+np.deg2rad(90)#-ang
         nst=[]
         nst.append(self.get_image('0'))
-        nst.append(self.get_image('1'))
-        nst.append(self.get_image('2'))
-        nst.append(self.get_image('3'))
-        nst.append(self.get_image('4'))
+        #nst.append(self.get_image('1'))
+        #nst.append(self.get_image('2'))
+        #nst.append(self.get_image('3'))
+        #nst.append(self.get_image('4'))
+        
+        nst.append(self.get_image('0',img_type='seg'))
+        '''
+        nst.append(self.get_image('1',img_type='seg'))
+        nst.append(self.get_image('2',img_type='seg'))
+        nst.append(self.get_image('3',img_type='seg'))
+        nst.append(self.get_image('4',img_type='seg'))
+        
+        nst.append(self.get_image('0',img_type='dp'))
+        nst.append(self.get_image('1',img_type='dp'))
+        nst.append(self.get_image('2',img_type='dp'))
+        nst.append(self.get_image('3',img_type='dp'))
+        nst.append(self.get_image('4',img_type='dp'))
+        '''
         rw=0
         ter=0
         info=0
